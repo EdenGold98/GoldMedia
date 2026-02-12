@@ -1,0 +1,154 @@
+/* static/style.css */
+
+/* ... (previous styles are unchanged) ... */
+:root {
+    --primary-bg: #121212;
+    --secondary-bg: #1e1e1e;
+    --nav-bg: #0a0a0a;
+    --card-bg: #2a2a2a;
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --accent-color: #1db954;
+    --hover-color: #3a3a3a;
+}
+* { box-sizing: border-box; }
+body { font-family: 'Poppins', sans-serif; background-color: var(--primary-bg); color: var(--text-primary); margin: 0; display: flex; }
+.app-container { display: flex; width: 100vw; height: 100vh; overflow: hidden; }
+#nav-panel { width: 280px; background-color: var(--nav-bg); padding: 20px; height: 100%; overflow-y: auto; flex-shrink: 0; border-right: 1px solid #000; }
+#content-panel { flex-grow: 1; height: 100%; overflow-y: auto; padding: 20px 40px; }
+.nav-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--secondary-bg); padding-bottom: 10px; }
+#nav-panel h2 { margin: 0; padding: 0; border: none; }
+#refresh-nav-btn { background: none; border: none; color: var(--text-secondary); font-size: 1.2em; cursor: pointer; padding: 5px; border-radius: 4px; transition: background-color 0.2s, color 0.2s; }
+#refresh-nav-btn:hover { background-color: var(--secondary-bg); color: var(--text-primary); }
+#folder-tree ul { list-style: none; padding-left: 15px; }
+#folder-tree li > ul { display: none; }
+#folder-tree li.active-branch > ul { display: block; }
+#folder-tree a { color: var(--text-secondary); text-decoration: none; display: block; padding: 8px; border-radius: 4px; transition: background-color 0.2s, color 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#folder-tree a:hover { background-color: var(--secondary-bg); color: var(--text-primary); }
+#folder-tree a.currently-selected { color: var(--accent-color); font-weight: 600; }
+#content-panel header { margin-bottom: 20px; }
+.media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
+.media-card { background-color: var(--card-bg); border-radius: 8px; overflow: hidden; cursor: pointer; transition: all 0.2s ease-in-out; }
+.media-card:hover { transform: translateY(-5px); background-color: var(--hover-color); box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
+.media-card.folder { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+.media-card.go-back { background-color: #2a3a2b; }
+.media-card.go-back:hover { background-color: var(--accent-color); color: var(--text-primary); }
+.card-icon { font-size: 3em; }
+.card-thumbnail { width: 100%; padding-bottom: 56.25%; background-size: cover; background-position: center; background-color: #000; background-image: none; opacity: 0.5; transition: opacity 0.5s ease-in-out; }
+.card-thumbnail[style*="url"] { opacity: 1; }
+.card-content { padding: 15px; }
+.media-card h3 { margin: 0; font-size: 1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#video-player-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; display: flex; z-index: 1000; align-items: center; justify-content: center; cursor: none; }
+#video-player-overlay.hidden { display: none !important; }
+#video-player { width: 100%; height: 100%; }
+.controls-container { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 20px; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); z-index: 1001; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; }
+.controls-container.visible { opacity: 1; visibility: visible; cursor: default; }
+.controls-main { display: flex; align-items: center; gap: 15px; }
+.control-btn { background: none; border: none; color: white; font-size: 1.5em; cursor: pointer; padding: 5px; }
+.spacer { flex-grow: 1; }
+.time-display { font-size: 0.9em; user-select: none; }
+.volume-container { display: flex; align-items: center; }
+#volume-slider { cursor: pointer; }
+
+/* ===== Custom subtitle overlay (drawn by JS) ===== */
+#subtitle-overlay {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 6vh;                /* default baseline when HUD hidden */
+    padding: 0 5%;
+    text-align: center;
+    font-weight: 600;
+    line-height: 1.35;
+    /* Use CSS vars so JS can live-tweak */
+    font-size: calc(var(--sub-size, 100) * 1% * 2.2vmin);
+    color: var(--sub-color, #ffffff);
+    text-shadow:
+      0 1px 1px rgba(0,0,0,.9),
+      0 2px 2px rgba(0,0,0,.8),
+      0 3px 6px rgba(0,0,0,.7);
+    pointer-events: none;       /* never block clicks */
+    z-index: 1003;              /* > controls (1001) & settings (1002) */
+    white-space: pre-wrap;      /* preserve multi-line cues */
+}
+
+/* An optional pill background on each line for legibility (toggle-able) */
+#subtitle-overlay .line {
+    display: inline;
+    background: rgba(0,0,0,.45);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding: 0 .25em;
+    border-radius: .25em;
+}
+
+/* --- Progress Bar Styles (UPDATED FOR HOVER PREVIEW) --- */
+.progress-bar-container {
+    width: 100%;
+    padding: 10px 0; /* Increased padding for easier hover */
+    cursor: pointer;
+    position: relative; /* Needed for tooltip positioning */
+}
+.progress-bar {
+    width: 100%;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    position: relative; /* Children will be positioned relative to this */
+    transition: height 0.1s ease-in-out;
+}
+.progress-bar-container:hover .progress-bar {
+    height: 8px;
+}
+.progress-bar-filled {
+    width: 0%;
+    height: 100%;
+    background-color: var(--accent-color);
+    border-radius: 5px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    z-index: 3;
+}
+/* NEW FEATURE: Style for the hover preview bar */
+.progress-bar-hover {
+    width: 0%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+    border-radius: 5px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    z-index: 2;
+    display: none; /* Hidden by default */
+}
+.progress-bar-container:hover .progress-bar-hover {
+    display: block; /* Show on hover */
+}
+/* NEW FEATURE: Style for the time tooltip */
+.progress-bar-tooltip {
+    position: absolute;
+    top: -10px; /* Position above the bar */
+    left: 0; /* Will be set by JS */
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    user-select: none;
+    pointer-events: none;
+    display: none; /* Hidden by default */
+}
+.progress-bar-container:hover .progress-bar-tooltip {
+    display: block; /* Show on hover */
+}
+
+/* --- (rest of the styles are unchanged) --- */
+#settings-panel { position: absolute; bottom: 80px; right: 20px; background: rgba(20, 20, 20, 0.9); border: 1px solid #333; border-radius: 8px; padding: 20px; z-index: 1002; width: 320px; }
+#settings-panel.hidden { display: none !important; }
+#settings-panel h3 { margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 5px; font-size: 1.1em; }
+.setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.setting-row label { flex-shrink: 0; margin-right: 10px; }
+.setting-row select, .setting-row input { background-color: #333; color: white; border: 1px solid #555; border-radius: 4px; padding: 5px; }

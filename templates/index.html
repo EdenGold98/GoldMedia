@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ server_name }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+  <!-- Minimal safety styles to ensure the progress bar visibly fills even if external CSS differs -->
+  <style>
+    .progress-bar-container{position:relative;padding:8px 12px;user-select:none}
+    .progress-bar{position:relative;height:8px;background:#1f2937;border-radius:999px;overflow:hidden;cursor:pointer}
+    .progress-bar-filled{position:absolute;inset:0 auto 0 0;width:0;height:100%;background:#22c55e;/* green */}
+    .progress-bar-hover{position:absolute;inset:0 auto 0 0;width:0;height:100%;background:rgba(255,255,255,0.25);pointer-events:none}
+    .progress-bar-tooltip{position:absolute;top:-26px;left:0;transform:translateX(-50%);font:12px/1.2 Poppins,sans-serif;background:rgba(0,0,0,.85);color:#fff;padding:2px 6px;border-radius:4px}
+    #custom-controls-container.controls-container{position:absolute;left:0;right:0;bottom:0;padding:8px 12px;display:flex;flex-direction:column;gap:8px}
+    #custom-controls-container .controls-main{display:flex;align-items:center;gap:10px}
+    #video-player-overlay{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;justify-content:flex-end}
+    #video-player{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+    .control-btn{font-size:16px}
+    .time-display{min-width:120px;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <nav id="nav-panel">
+      <div class="nav-header">
+        <h2>Library</h2>
+        <button id="refresh-nav-btn" title="Refresh Library">🔄</button>
+      </div>
+      <div id="folder-tree"></div>
+    </nav>
+
+    <main id="content-panel">
+      <header>
+        <h1 id="current-folder-title">Home</h1>
+      </header>
+      <div id="media-grid" class="media-grid"></div>
+    </main>
+
+    <!-- Player Overlay -->
+    <div id="video-player-overlay" class="hidden" tabindex="-1" aria-label="Video player">
+      <!-- The video element; attributes improve mobile/fullscreen behavior -->
+      <video id="video-player" playsinline webkit-playsinline preload="metadata"></video>
+      
+      <div id="subtitle-overlay" aria-live="polite"></div>
+      
+      <!-- Custom Controls -->
+      <div id="custom-controls-container" class="controls-container">
+        <!-- Seek bar with hover preview + tooltip (IDs wired in app.js) -->
+        <div class="progress-bar-container">
+          <div id="progress-bar-tooltip" class="progress-bar-tooltip">00:00</div>
+          <div class="progress-bar">
+            <div id="progress-bar-hover" class="progress-bar-hover"></div>
+            <div id="progress-bar-filled" class="progress-bar-filled"></div>
+          </div>
+        </div>
+
+        <div class="controls-main">
+          <button id="back-to-browse-btn" class="control-btn" title="Back to Browser">⮨</button>
+          <button id="play-pause-btn" class="control-btn" title="Play/Pause (Space)">▶️</button>
+
+          <div class="volume-container">
+            <span id="volume-icon">🔊</span>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" title="Volume" />
+          </div>
+
+          <div class="time-display">
+            <span id="current-time">00:00</span> / <span id="duration">00:00</span>
+          </div>
+
+          <div class="spacer" style="flex:1 1 auto"></div>
+          <button id="settings-btn" class="control-btn" title="Settings">⚙️</button>
+          <button id="fullscreen-btn" class="control-btn" title="Fullscreen (F)">⛶</button>
+        </div>
+      </div>
+
+      <!-- Settings Panel -->
+      <div id="settings-panel" class="hidden" role="dialog" aria-modal="true" aria-label="Player settings">
+        <h3>Track Selection</h3>
+        <div class="setting-row">
+          <label for="audio-track-select">Audio:</label>
+          <select id="audio-track-select"></select>
+        </div>
+        <div class="setting-row">
+          <label for="subtitle-track-select">Subtitles:</label>
+          <select id="subtitle-track-select"></select>
+        </div>
+
+        <h3>Subtitle Appearance</h3>
+        <div class="setting-row">
+          <label for="sub-size">Size:</label>
+          <input type="range" id="sub-size" min="50" max="200" value="100" />
+        </div>
+        <div class="setting-row">
+          <label for="sub-color">Color:</label>
+          <input type="color" id="sub-color" value="#FFFFFF" />
+        </div>
+        <div class="setting-row">
+          <label for="sub-delay">Delay (s):</label>
+          <input type="number" id="sub-delay" value="0" step="0.1" style="width:60px" />
+        </div>
+        <button id="close-settings-button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic CSS for subtitles (modified by JS) -->
+  <style id="subtitle-styler"></style>
+
+  <!-- Load app.js via url_for to avoid stale caching -->
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>

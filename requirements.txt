@@ -1,0 +1,8 @@
+Flask
+Pillow
+email-validator
+moviepy
+miniupnpc
+psutil
+pystray
+webvtt
